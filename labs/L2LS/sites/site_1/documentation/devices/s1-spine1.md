@@ -15,6 +15,7 @@
   - [AAA Authorization](#aaa-authorization)
 - [Monitoring](#monitoring)
   - [TerminAttr Daemon](#terminattr-daemon)
+  - [Logging](#logging)
 - [MLAG](#mlag)
   - [MLAG Summary](#mlag-summary)
   - [MLAG Device Configuration](#mlag-device-configuration)
@@ -220,6 +221,31 @@ daemon TerminAttr
    no shutdown
 ```
 
+### Logging
+
+#### Logging Servers and Features Summary
+
+| Type | Level |
+| -----| ----- |
+
+| VRF | Source Interface |
+| --- | ---------------- |
+| default | Management0 |
+
+| VRF | Hosts | Ports | Protocol | SSL-profile |
+| --- | ----- | ----- | -------- | ----------- |
+| default | 10.200.0.108 | Default | UDP | - |
+| default | 10.200.1.108 | Default | UDP | - |
+
+#### Logging Servers and Features Device Configuration
+
+```eos
+!
+logging host 10.200.0.108
+logging host 10.200.1.108
+logging source-interface Management0
+```
+
 ## MLAG
 
 ### MLAG Summary
@@ -329,6 +355,8 @@ vlan 4094
 | Ethernet4 | L2_s1-leaf3_Ethernet2 | *trunk | *20 | *- | *- | 4 |
 | Ethernet5 | L2_s1-leaf4_Ethernet2 | *trunk | *20 | *- | *- | 4 |
 | Ethernet6 | MLAG_s1-spine2_Ethernet6 | *trunk | *- | *- | *MLAG | 1 |
+| Ethernet9 | L2_s1-leaf5_Ethernet2 | *trunk | *10,20 | *- | *- | 9 |
+| Ethernet10 | L2_s1-leaf6_Ethernet2 | *trunk | *10,20 | *- | *- | 9 |
 
 *Inherited from Port-Channel Interface
 
@@ -390,6 +418,16 @@ interface Ethernet8
    ip address 10.0.0.33/31
    ip ospf network point-to-point
    ip ospf area 0.0.0.0
+!
+interface Ethernet9
+   description L2_s1-leaf5_Ethernet2
+   no shutdown
+   channel-group 9 mode active
+!
+interface Ethernet10
+   description L2_s1-leaf6_Ethernet2
+   no shutdown
+   channel-group 9 mode active
 ```
 
 ### Port-Channel Interfaces
@@ -403,6 +441,7 @@ interface Ethernet8
 | Port-Channel1 | MLAG_s1-spine2_Port-Channel1 | trunk | - | - | MLAG | - | - | - | - |
 | Port-Channel2 | L2_RACK1_Port-Channel2 | trunk | 10 | - | - | - | - | 2 | - |
 | Port-Channel4 | L2_RACK2_Port-Channel2 | trunk | 20 | - | - | - | - | 4 | - |
+| Port-Channel9 | L2_RACK3_Port-Channel2 | trunk | 10,20 | - | - | - | - | 9 | - |
 
 #### Port-Channel Interfaces Device Configuration
 
@@ -430,6 +469,14 @@ interface Port-Channel4
    switchport mode trunk
    switchport
    mlag 4
+!
+interface Port-Channel9
+   description L2_RACK3_Port-Channel2
+   no shutdown
+   switchport trunk allowed vlan 10,20
+   switchport mode trunk
+   switchport
+   mlag 9
 ```
 
 ### Loopback Interfaces
